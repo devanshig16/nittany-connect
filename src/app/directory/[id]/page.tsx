@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getInitials } from "@/lib/avatar";
 
 export default async function DirectoryProfilePage(
   props: PageProps<"/directory/[id]">
@@ -33,7 +34,7 @@ export default async function DirectoryProfilePage(
       </Link>
 
       <div className="mt-6 flex items-center gap-4">
-        {profile.user.image && (
+        {profile.user.image ? (
           <Image
             src={profile.user.image}
             alt={profile.user.name ?? "Member photo"}
@@ -41,6 +42,10 @@ export default async function DirectoryProfilePage(
             height={64}
             className="rounded-full"
           />
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-200 text-lg font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+            {getInitials(profile.user.name)}
+          </div>
         )}
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">

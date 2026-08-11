@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AuthButtons } from "@/components/AuthButtons";
+import { getInitials } from "@/lib/avatar";
 import type { Prisma } from "@/generated/prisma/client";
 
 type ProfileWithUser = Prisma.ProfileGetPayload<{ include: { user: true } }>;
@@ -165,7 +166,7 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
             >
               <Link href={`/directory/${profile.id}`} className="block">
                 <div className="flex items-center gap-3">
-                  {profile.user.image && (
+                  {profile.user.image ? (
                     <Image
                       src={profile.user.image}
                       alt={profile.user.name ?? "Member photo"}
@@ -173,6 +174,10 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
                       height={40}
                       className="rounded-full"
                     />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-200 text-sm font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+                      {getInitials(profile.user.name)}
+                    </div>
                   )}
                   <div>
                     <p className="font-medium">{profile.user.name}</p>
