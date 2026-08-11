@@ -26,21 +26,30 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
   const [values, setValues] = useState(initial);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function set<K extends keyof ProfileFormValues>(key: K, value: ProfileFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
     setSaved(false);
+    setError(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    await fetch("/api/profile", {
+    setError(null);
+    const res = await fetch("/api/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
     setSaving(false);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setError(body?.error ?? "Something went wrong. Please try again.");
+      setSaved(false);
+      return;
+    }
     setSaved(true);
     router.refresh();
   }
@@ -162,6 +171,9 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
         </button>
         {saved && (
           <span className="text-sm text-neutral-500">Saved.</span>
+        )}
+        {error && (
+          <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
         )}
       </div>
     </form>
