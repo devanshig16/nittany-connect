@@ -14,6 +14,7 @@ type ProfileFormValues = {
   lookingFor: string;
   linkedinUrl: string;
   websiteUrl: string;
+  isPublic: boolean;
 };
 
 const fieldClass =
@@ -24,9 +25,11 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
   const router = useRouter();
   const [values, setValues] = useState(initial);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   function set<K extends keyof ProfileFormValues>(key: K, value: ProfileFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
+    setSaved(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -38,6 +41,7 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
       body: JSON.stringify(values),
     });
     setSaving(false);
+    setSaved(true);
     router.refresh();
   }
 
@@ -139,6 +143,15 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
         </div>
       </div>
 
+      <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+        <input
+          type="checkbox"
+          checked={values.isPublic}
+          onChange={(e) => set("isPublic", e.target.checked)}
+        />
+        List me in the public directory
+      </label>
+
       <div className="flex items-center gap-3">
         <button
           type="submit"
@@ -147,6 +160,9 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
         >
           {saving ? "Saving…" : "Save profile"}
         </button>
+        {saved && (
+          <span className="text-sm text-neutral-500">Saved.</span>
+        )}
       </div>
     </form>
   );
