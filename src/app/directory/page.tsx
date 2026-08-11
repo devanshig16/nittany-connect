@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AuthButtons } from "@/components/AuthButtons";
@@ -40,7 +42,10 @@ export default async function DirectoryPage() {
 
       {profiles.length === 0 ? (
         <p className="mt-12 text-sm text-neutral-500">
-          No public profiles yet.
+          No public profiles yet.{" "}
+          <Link href="/profile" className="underline">
+            Be the first to add yours.
+          </Link>
         </p>
       ) : (
         <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -49,7 +54,25 @@ export default async function DirectoryPage() {
               key={profile.id}
               className="rounded-xl border border-neutral-200 p-5 dark:border-neutral-800"
             >
-              <p className="font-medium">{profile.user.name}</p>
+              <div className="flex items-center gap-3">
+                {profile.user.image && (
+                  <Image
+                    src={profile.user.image}
+                    alt={profile.user.name ?? "Member photo"}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                )}
+                <div>
+                  <p className="font-medium">{profile.user.name}</p>
+                  {profile.location && (
+                    <p className="text-xs text-neutral-500">
+                      {profile.location}
+                    </p>
+                  )}
+                </div>
+              </div>
             </li>
           ))}
         </ul>
