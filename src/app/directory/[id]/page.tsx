@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getInitials } from "@/lib/avatar";
+import { CopyEmailButton } from "@/components/CopyEmailButton";
 
 export default async function DirectoryProfilePage(
   props: PageProps<"/directory/[id]">
@@ -95,12 +96,15 @@ export default async function DirectoryProfilePage(
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
         {profile.user.email && (
-          <a
-            href={`mailto:${profile.user.email}`}
-            className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
-            Email {profile.user.name?.split(" ")[0] ?? "them"}
-          </a>
+          <>
+            <a
+              href={`mailto:${profile.user.email}`}
+              className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+            >
+              Email {profile.user.name?.split(" ")[0] ?? "them"}
+            </a>
+            <CopyEmailButton email={profile.user.email} />
+          </>
         )}
         {profile.linkedinUrl && (
           <a
