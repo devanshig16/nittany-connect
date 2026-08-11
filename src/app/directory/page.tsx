@@ -14,14 +14,32 @@ const fieldClass =
 export default async function DirectoryPage(props: PageProps<"/directory">) {
   const session = await auth();
 
+  const memberCount = await prisma.profile.count({
+    where: { isPublic: true },
+  });
+
   if (!session?.user) {
+    const memberCopy =
+      memberCount > 0
+        ? `Join ${memberCount} Penn State parent${
+            memberCount === 1 ? "" : "s"
+          } already connecting`
+        : "Be one of the first Penn State parents to join";
+
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Sign in to browse the directory
         </h1>
+        <p className="mt-3 text-sm font-medium text-accent">{memberCopy}</p>
         <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
           The directory is only visible to signed-in Nittany Connect members.
+          This space is for Penn State parents connecting on trade, business,
+          and occupation.
+        </p>
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+          Only signed-in Nittany Connect members can see the directory — your
+          profile is never shown to search engines or the public.
         </p>
         <div className="mt-6">
           <AuthButtons />
