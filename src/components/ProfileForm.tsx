@@ -10,6 +10,8 @@ type ProfileFormValues = {
   occupation: string;
   industry: string;
   company: string;
+  bio: string;
+  lookingFor: string;
 };
 
 const fieldClass =
@@ -93,6 +95,27 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
             onChange={(e) => set("gradYear", e.target.value)}
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className={labelClass}>Bio</label>
+        <textarea
+          className={fieldClass}
+          rows={4}
+          placeholder="A short intro — what you do and what you're looking for."
+          value={values.bio}
+          onChange={(e) => set("bio", e.target.value)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className={labelClass}>What are you looking for?</label>
+        <input
+          className={fieldClass}
+          placeholder="e.g. mentorship, referrals, partners, hiring"
+          value={values.lookingFor}
+          onChange={(e) => set("lookingFor", e.target.value)}
+        />
       </div>
 
       <div className="flex items-center gap-3">
