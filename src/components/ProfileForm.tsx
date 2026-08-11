@@ -12,6 +12,8 @@ type ProfileFormValues = {
   company: string;
   bio: string;
   lookingFor: string;
+  linkedinUrl: string;
+  websiteUrl: string;
 };
 
 const fieldClass =
@@ -116,6 +118,25 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
           value={values.lookingFor}
           onChange={(e) => set("lookingFor", e.target.value)}
         />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label className={labelClass}>LinkedIn URL</label>
+          <input
+            className={fieldClass}
+            value={values.linkedinUrl}
+            onChange={(e) => set("linkedinUrl", e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelClass}>Website URL</label>
+          <input
+            className={fieldClass}
+            value={values.websiteUrl}
+            onChange={(e) => set("websiteUrl", e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
