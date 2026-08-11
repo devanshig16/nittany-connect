@@ -1,4 +1,10 @@
-export default function Home() {
+import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { AuthButtons } from "@/components/AuthButtons";
+
+export default async function Home() {
+  const session = await auth();
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-center px-6 py-24 text-center">
       <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -8,6 +14,19 @@ export default function Home() {
         A quiet space for parents of Penn State students to meet, talk trade,
         occupations, and business, and find ways to work together.
       </p>
+
+      <div className="mt-8 flex items-center gap-4">
+        {session?.user ? (
+          <Link
+            href="/directory"
+            className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+          >
+            Browse the directory
+          </Link>
+        ) : (
+          <AuthButtons />
+        )}
+      </div>
 
       <div className="mt-20 grid grid-cols-1 gap-8 text-left sm:grid-cols-3">
         <div>
