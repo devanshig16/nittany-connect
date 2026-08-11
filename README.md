@@ -41,3 +41,11 @@ Built with Next.js (App Router), Tailwind CSS, Auth.js (Google sign-in), and Pri
    ```
 
    Open [http://localhost:3000](http://localhost:3000).
+
+## Database setup
+
+This project uses [Neon](https://neon.tech) Postgres with Prisma's `@prisma/adapter-neon` driver adapter (works well on Vercel's serverless/edge runtime).
+
+1. Create a free project at [neon.tech](https://neon.tech) (or add the Neon integration from the Vercel dashboard: Storage → Create Database → Neon).
+2. Copy the pooled connection string into `DATABASE_URL`.
+3. Run `npx prisma db push` to create the tables (or `npx prisma migrate dev` once you want tracked migrations).
