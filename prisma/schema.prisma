@@ -19,6 +19,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  profile  Profile?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -55,4 +56,30 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+// Profile fields specific to Nittany Connect: PSU parents connecting
+// around trades, occupations, and business.
+model Profile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  studentName    String? // their PSU student's name, optional
+  gradYear       Int? // student's expected graduation year
+  location       String? // city/state the parent is based in
+  occupation     String? // job title / role
+  industry       String? // e.g. "Trades", "Real Estate", "Finance"
+  company        String? // business or employer name
+  bio            String? @db.Text // short intro, what they do & what they're looking for
+  lookingFor     String? @db.Text // e.g. "mentorship", "referrals", "partners", "hiring"
+  linkedinUrl    String?
+  websiteUrl     String?
+  isPublic       Boolean @default(true) // whether profile shows in the directory
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([industry])
+  @@index([isPublic])
 }
