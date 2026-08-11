@@ -29,7 +29,7 @@ export default async function DirectoryProfilePage(
     <div className="mx-auto max-w-2xl px-6 py-16">
       <Link
         href="/directory"
-        className="text-sm text-neutral-500 underline underline-offset-2"
+        className="text-sm text-neutral-500 underline underline-offset-2 transition hover:text-accent"
       >
         ← Back to directory
       </Link>
@@ -67,7 +67,7 @@ export default async function DirectoryProfilePage(
       )}
 
       {profile.industry && (
-        <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+        <span className="mt-2 inline-block rounded-full bg-accent-subtle px-2.5 py-0.5 text-xs font-medium text-accent-subtle-foreground">
           {profile.industry}
         </span>
       )}
@@ -86,12 +86,12 @@ export default async function DirectoryProfilePage(
       )}
 
       {profile.lookingFor && (
-        <p className="mt-4 text-sm text-neutral-500">
-          <span className="font-medium text-neutral-700 dark:text-neutral-300">
-            Looking for:
-          </span>{" "}
-          {profile.lookingFor}
-        </p>
+        <div className="mt-5 rounded-lg border border-accent-border bg-accent-subtle px-4 py-3">
+          <p className="text-sm text-accent-subtle-foreground">
+            <span className="font-medium">Looking for:</span>{" "}
+            {profile.lookingFor}
+          </p>
+        </div>
       )}
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -99,7 +99,7 @@ export default async function DirectoryProfilePage(
           <>
             <a
               href={`mailto:${profile.user.email}`}
-              className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+              className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:bg-accent-hover"
             >
               Email {profile.user.name?.split(" ")[0] ?? "them"}
             </a>
@@ -111,7 +111,7 @@ export default async function DirectoryProfilePage(
             href={profile.linkedinUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-sm underline underline-offset-2"
+            className="text-sm text-neutral-600 underline underline-offset-2 transition hover:text-accent dark:text-neutral-400"
           >
             LinkedIn
           </a>
@@ -121,7 +121,7 @@ export default async function DirectoryProfilePage(
             href={profile.websiteUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-sm underline underline-offset-2"
+            className="text-sm text-neutral-600 underline underline-offset-2 transition hover:text-accent dark:text-neutral-400"
           >
             Website
           </a>
