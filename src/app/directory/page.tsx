@@ -169,7 +169,11 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
         </div>
       )}
 
-      <div className="mt-8 flex flex-col gap-3">
+      <details className="group mt-8">
+        <summary className="cursor-pointer list-none rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition select-none hover:border-neutral-400 sm:hidden dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500">
+          Filters{hasFilters ? " (active)" : ""}
+        </summary>
+        <div className="hidden mt-3 flex-col gap-3 group-open:flex sm:mt-0 sm:flex!">
         <form className="flex flex-wrap gap-3" method="get">
           {lookingFor && (
             <input type="hidden" name="lookingFor" value={lookingFor} />
@@ -233,7 +237,8 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
             );
           })}
         </div>
-      </div>
+        </div>
+      </details>
 
       {profiles.length === 0 ? (
         <div className="mt-12 flex flex-col items-center rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center dark:border-neutral-700">
