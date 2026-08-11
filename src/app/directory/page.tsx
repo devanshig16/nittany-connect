@@ -73,6 +73,20 @@ export default async function DirectoryPage() {
                   )}
                 </div>
               </div>
+
+              {(profile.occupation || profile.company) && (
+                <p className="mt-3 text-sm">
+                  {profile.occupation}
+                  {profile.occupation && profile.company ? " at " : ""}
+                  {profile.company}
+                </p>
+              )}
+
+              {profile.industry && (
+                <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+                  {profile.industry}
+                </span>
+              )}
             </li>
           ))}
         </ul>
