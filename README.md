@@ -49,3 +49,22 @@ This project uses [Neon](https://neon.tech) Postgres with Prisma's `@prisma/adap
 1. Create a free project at [neon.tech](https://neon.tech) (or add the Neon integration from the Vercel dashboard: Storage → Create Database → Neon).
 2. Copy the pooled connection string into `DATABASE_URL`.
 3. Run `npx prisma db push` to create the tables (or `npx prisma migrate dev` once you want tracked migrations).
+
+## Google sign-in setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and create (or select) a project.
+2. Configure the OAuth consent screen (External, add your email as a test user while unpublished).
+3. Create an **OAuth client ID** of type **Web application**.
+4. Add authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (local dev)
+   - `https://<your-vercel-domain>/api/auth/callback/google` (production)
+5. Copy the **Client ID** and **Client secret** into `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
+
+## Deploying to Vercel
+
+1. Push this repo to GitHub (already done if you're reading this from the repo).
+2. Import the repo at [vercel.com/new](https://vercel.com/new).
+3. Add the Neon integration (Storage tab) or set `DATABASE_URL` manually in Project Settings → Environment Variables.
+4. Add `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` in Project Settings → Environment Variables.
+5. Update the Google OAuth client's authorized redirect URI to include your production domain.
+6. Deploy. After the first deploy, run `npx prisma db push` locally (pointed at the production `DATABASE_URL`) or set up a migration step in CI.
