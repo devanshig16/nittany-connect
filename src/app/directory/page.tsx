@@ -87,6 +87,41 @@ export default async function DirectoryPage() {
                   {profile.industry}
                 </span>
               )}
+
+              {profile.bio && (
+                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  {profile.bio}
+                </p>
+              )}
+
+              {profile.lookingFor && (
+                <p className="mt-3 text-xs text-neutral-500">
+                  Looking for: {profile.lookingFor}
+                </p>
+              )}
+
+              <div className="mt-4 flex gap-4 text-xs">
+                {profile.linkedinUrl && (
+                  <a
+                    href={profile.linkedinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    LinkedIn
+                  </a>
+                )}
+                {profile.websiteUrl && (
+                  <a
+                    href={profile.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    Website
+                  </a>
+                )}
+              </div>
             </li>
           ))}
         </ul>
