@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { INDUSTRIES } from "@/lib/directoryOptions";
+import { INDUSTRIES, LOOKING_FOR_TAGS } from "@/lib/directoryOptions";
 
 type ProfileFormValues = {
   studentName: string;
@@ -25,6 +25,41 @@ const sectionHeadingClass =
   "text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400";
 const sectionDescClass = "mt-1 text-sm text-neutral-500";
 
+// Best-effort parse of a combined "Tag, Tag — freeform" string back into
+// checkbox state. Only trusts the tag list when every comma-separated
+// segment before the separator is a recognized tag; otherwise the whole
+// original string is preserved in the freeform field so nothing is lost.
+function parseLookingFor(raw: string): { tags: string[]; other: string } {
+  if (!raw.trim()) {
+    return { tags: [], other: "" };
+  }
+  const separatorIndex = raw.indexOf(" — ");
+  const tagsPart = separatorIndex === -1 ? raw : raw.slice(0, separatorIndex);
+  const otherPart = separatorIndex === -1 ? "" : raw.slice(separatorIndex + 3);
+
+  const candidateTags = tagsPart
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const allRecognized =
+    candidateTags.length > 0 &&
+    candidateTags.every((t) => (LOOKING_FOR_TAGS as readonly string[]).includes(t));
+
+  if (allRecognized) {
+    return { tags: candidateTags, other: otherPart.trim() };
+  }
+
+  return { tags: [], other: raw };
+}
+
+function combineLookingFor(tags: string[], other: string): string {
+  const trimmedOther = other.trim();
+  const tagPart = tags.join(", ");
+  if (tagPart && trimmedOther) return `${tagPart} — ${trimmedOther}`;
+  if (tagPart) return tagPart;
+  return trimmedOther;
+}
+
 export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
   const router = useRouter();
   const [values, setValues] = useState(initial);
@@ -32,10 +67,33 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [lookingForTags, setLookingForTags] = useState<string[]>(
+    () => parseLookingFor(initial.lookingFor).tags
+  );
+  const [lookingForOther, setLookingForOther] = useState<string>(
+    () => parseLookingFor(initial.lookingFor).other
+  );
+
   function set<K extends keyof ProfileFormValues>(key: K, value: ProfileFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
     setSaved(false);
     setError(null);
+  }
+
+  // Tag checkboxes and the freeform detail are the source of truth for the
+  // UI, but the single lookingFor string (what actually gets submitted) is
+  // recombined and pushed into values on every change.
+  function toggleLookingForTag(tag: string) {
+    setLookingForTags((prev) => {
+      const next = prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag];
+      set("lookingFor", combineLookingFor(next, lookingForOther));
+      return next;
+    });
+  }
+
+  function setLookingForOtherText(text: string) {
+    setLookingForOther(text);
+    set("lookingFor", combineLookingFor(lookingForTags, text));
   }
 
   const industryOptions =
@@ -143,13 +201,29 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label className={labelClass}>What are you looking for?</label>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {LOOKING_FOR_TAGS.map((tag) => (
+              <label
+                key={tag}
+                className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300"
+              >
+                <input
+                  type="checkbox"
+                  checked={lookingForTags.includes(tag)}
+                  onChange={() => toggleLookingForTag(tag)}
+                  className="h-4 w-4 accent-accent"
+                />
+                {tag}
+              </label>
+            ))}
+          </div>
           <input
             className={fieldClass}
-            placeholder="e.g. mentorship, referrals, partners, hiring"
-            value={values.lookingFor}
-            onChange={(e) => set("lookingFor", e.target.value)}
+            placeholder="Anything else? (optional)"
+            value={lookingForOther}
+            onChange={(e) => setLookingForOtherText(e.target.value)}
           />
         </div>
       </fieldset>
