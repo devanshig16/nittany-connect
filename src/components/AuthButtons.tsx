@@ -13,7 +13,7 @@ export async function AuthButtons() {
       >
         <button
           type="submit"
-          className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+          className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground shadow-sm transition hover:bg-accent-hover"
         >
           Sign in with Google
         </button>
@@ -25,7 +25,7 @@ export async function AuthButtons() {
     <div className="flex items-center gap-3">
       <a
         href="/profile"
-        className="text-sm font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
+        className="text-sm font-medium text-neutral-700 transition hover:text-accent dark:text-neutral-300 dark:hover:text-accent"
       >
         {session.user.name}
       </a>
