@@ -63,7 +63,7 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
       : {}),
   };
 
-  const [profiles, totalCount, industryRows] = await Promise.all([
+  const [profiles, totalCount, industryRows, ownProfile] = await Promise.all([
     prisma.profile.findMany({
       where,
       include: { user: true },
@@ -77,6 +77,10 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
       select: { industry: true },
       distinct: ["industry"],
       orderBy: { industry: "asc" },
+    }),
+    prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
     }),
   ]);
 
@@ -104,6 +108,21 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
         Penn State parents open to connecting on trade, business, and
         occupation.
       </p>
+
+      {!ownProfile && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <p className="text-sm text-neutral-700 dark:text-neutral-300">
+            You haven&apos;t created your profile yet — other parents can&apos;t
+            find or contact you until you do.
+          </p>
+          <Link
+            href="/profile"
+            className="shrink-0 rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+          >
+            Complete your profile
+          </Link>
+        </div>
+      )}
 
       <form className="mt-8 flex flex-wrap gap-3" method="get">
         <input
@@ -180,7 +199,14 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
                     </div>
                   )}
                   <div>
-                    <p className="font-medium">{profile.user.name}</p>
+                    <p className="font-medium">
+                      {profile.user.name}
+                      {profile.userId === session.user.id && (
+                        <span className="ml-2 rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-normal text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+                          You
+                        </span>
+                      )}
+                    </p>
                     {profile.location && (
                       <p className="text-xs text-neutral-500">
                         {profile.location}
