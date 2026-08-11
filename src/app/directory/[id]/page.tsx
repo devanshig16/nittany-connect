@@ -96,15 +96,7 @@ export default async function DirectoryProfilePage(
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
         {profile.user.email && (
-          <>
-            <a
-              href={`mailto:${profile.user.email}`}
-              className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:bg-accent-hover"
-            >
-              Email {profile.user.name?.split(" ")[0] ?? "them"}
-            </a>
-            <CopyEmailButton email={profile.user.email} />
-          </>
+          <CopyEmailButton email={profile.user.email} />
         )}
         {profile.linkedinUrl && (
           <a
