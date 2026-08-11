@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AuthButtons } from "@/components/AuthButtons";
 import { getInitials } from "@/lib/avatar";
+import { LOOKING_FOR_TAGS } from "@/lib/directoryOptions";
 import type { Prisma } from "@/generated/prisma/client";
 
 type ProfileWithUser = Prisma.ProfileGetPayload<{ include: { user: true } }>;
@@ -62,6 +63,8 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
     typeof searchParams.location === "string"
       ? searchParams.location.trim()
       : "";
+  const lookingFor =
+    typeof searchParams.lookingFor === "string" ? searchParams.lookingFor : "";
   const pageSize = 12;
   const requestedPage =
     typeof searchParams.page === "string" ? Number(searchParams.page) : 1;
@@ -73,6 +76,9 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
     ...(industry ? { industry } : {}),
     ...(location
       ? { location: { contains: location, mode: "insensitive" } }
+      : {}),
+    ...(lookingFor
+      ? { lookingFor: { contains: lookingFor, mode: "insensitive" } }
       : {}),
     ...(q
       ? {
@@ -114,7 +120,7 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
 
   const recencyCutoff = newProfileCutoff();
 
-  const hasFilters = Boolean(q || industry || location);
+  const hasFilters = Boolean(q || industry || location || lookingFor);
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const buildPageHref = (targetPage: number) => {
@@ -122,7 +128,18 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
     if (q) params.set("q", q);
     if (location) params.set("location", location);
     if (industry) params.set("industry", industry);
+    if (lookingFor) params.set("lookingFor", lookingFor);
     if (targetPage > 1) params.set("page", String(targetPage));
+    const query = params.toString();
+    return query ? `/directory?${query}` : "/directory";
+  };
+
+  const buildLookingForHref = (tag: string) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (location) params.set("location", location);
+    if (industry) params.set("industry", industry);
+    if (lookingFor !== tag) params.set("lookingFor", tag);
     const query = params.toString();
     return query ? `/directory?${query}` : "/directory";
   };
@@ -152,44 +169,71 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
         </div>
       )}
 
-      <form className="mt-8 flex flex-wrap gap-3" method="get">
-        <input
-          type="text"
-          name="q"
-          defaultValue={q}
-          placeholder="Search by name, role, or bio"
-          className={`${fieldClass} min-w-50 flex-1`}
-        />
-        <input
-          type="text"
-          name="location"
-          defaultValue={location}
-          placeholder="Location"
-          className={`${fieldClass} w-40`}
-        />
-        <select name="industry" defaultValue={industry} className={`${fieldClass} w-44`}>
-          <option value="">All industries</option>
-          {industries.map((value) => (
-            <option key={value} value={value}>
-              {value}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition hover:bg-accent-hover"
-        >
-          Filter
-        </button>
-        {hasFilters && (
-          <Link
-            href="/directory"
-            className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500"
+      <div className="mt-8 flex flex-col gap-3">
+        <form className="flex flex-wrap gap-3" method="get">
+          {lookingFor && (
+            <input type="hidden" name="lookingFor" value={lookingFor} />
+          )}
+          <input
+            type="text"
+            name="q"
+            defaultValue={q}
+            placeholder="Search by name, role, or bio"
+            className={`${fieldClass} min-w-50 flex-1`}
+          />
+          <input
+            type="text"
+            name="location"
+            defaultValue={location}
+            placeholder="Location"
+            className={`${fieldClass} w-40`}
+          />
+          <select name="industry" defaultValue={industry} className={`${fieldClass} w-44`}>
+            <option value="">All industries</option>
+            {industries.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition hover:bg-accent-hover"
           >
-            Clear
-          </Link>
-        )}
-      </form>
+            Filter
+          </button>
+          {hasFilters && (
+            <Link
+              href="/directory"
+              className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500"
+            >
+              Clear
+            </Link>
+          )}
+        </form>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-neutral-500">
+            Looking for:
+          </span>
+          {LOOKING_FOR_TAGS.map((tag) => {
+            const active = lookingFor === tag;
+            return (
+              <Link
+                key={tag}
+                href={buildLookingForHref(tag)}
+                className={
+                  active
+                    ? "rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground transition hover:bg-accent-hover"
+                    : "rounded-full bg-accent-subtle px-3 py-1 text-xs font-medium text-accent-subtle-foreground transition hover:bg-accent-border"
+                }
+              >
+                {tag}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
 
       {profiles.length === 0 ? (
         <div className="mt-12 flex flex-col items-center rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center dark:border-neutral-700">
