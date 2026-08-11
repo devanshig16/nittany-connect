@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 type ProfileFormValues = {
+  studentName: string;
+  gradYear: string;
+  location: string;
   occupation: string;
   industry: string;
   company: string;
@@ -61,6 +64,33 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
             className={fieldClass}
             value={values.company}
             onChange={(e) => set("company", e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelClass}>Location</label>
+          <input
+            className={fieldClass}
+            placeholder="City, State"
+            value={values.location}
+            onChange={(e) => set("location", e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelClass}>Student&apos;s name (optional)</label>
+          <input
+            className={fieldClass}
+            value={values.studentName}
+            onChange={(e) => set("studentName", e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelClass}>Student&apos;s grad year</label>
+          <input
+            className={fieldClass}
+            type="number"
+            placeholder="2028"
+            value={values.gradYear}
+            onChange={(e) => set("gradYear", e.target.value)}
           />
         </div>
       </div>
