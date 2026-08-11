@@ -7,7 +7,10 @@ import type { Prisma } from "@/generated/prisma/client";
 
 type ProfileWithUser = Prisma.ProfileGetPayload<{ include: { user: true } }>;
 
-export default async function DirectoryPage() {
+const fieldClass =
+  "rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm outline-none transition focus:border-neutral-500 dark:border-neutral-700 dark:focus:border-neutral-400";
+
+export default async function DirectoryPage(props: PageProps<"/directory">) {
   const session = await auth();
 
   if (!session?.user) {
@@ -26,11 +29,72 @@ export default async function DirectoryPage() {
     );
   }
 
-  const profiles = await prisma.profile.findMany({
-    where: { isPublic: true },
-    include: { user: true },
-    orderBy: { updatedAt: "desc" },
-  });
+  const searchParams = await props.searchParams;
+  const q = typeof searchParams.q === "string" ? searchParams.q.trim() : "";
+  const industry =
+    typeof searchParams.industry === "string" ? searchParams.industry : "";
+  const location =
+    typeof searchParams.location === "string"
+      ? searchParams.location.trim()
+      : "";
+  const pageSize = 12;
+  const requestedPage =
+    typeof searchParams.page === "string" ? Number(searchParams.page) : 1;
+  const page =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+  const where: Prisma.ProfileWhereInput = {
+    isPublic: true,
+    ...(industry ? { industry } : {}),
+    ...(location
+      ? { location: { contains: location, mode: "insensitive" } }
+      : {}),
+    ...(q
+      ? {
+          OR: [
+            { user: { name: { contains: q, mode: "insensitive" } } },
+            { occupation: { contains: q, mode: "insensitive" } },
+            { company: { contains: q, mode: "insensitive" } },
+            { bio: { contains: q, mode: "insensitive" } },
+            { lookingFor: { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  const [profiles, totalCount, industryRows] = await Promise.all([
+    prisma.profile.findMany({
+      where,
+      include: { user: true },
+      orderBy: { updatedAt: "desc" },
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    prisma.profile.count({ where }),
+    prisma.profile.findMany({
+      where: { isPublic: true, industry: { not: null } },
+      select: { industry: true },
+      distinct: ["industry"],
+      orderBy: { industry: "asc" },
+    }),
+  ]);
+
+  const industries = industryRows
+    .map((row) => row.industry)
+    .filter((value): value is string => Boolean(value));
+
+  const hasFilters = Boolean(q || industry || location);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (location) params.set("location", location);
+    if (industry) params.set("industry", industry);
+    if (targetPage > 1) params.set("page", String(targetPage));
+    const query = params.toString();
+    return query ? `/directory?${query}` : "/directory";
+  };
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
@@ -40,91 +104,141 @@ export default async function DirectoryPage() {
         occupation.
       </p>
 
+      <form className="mt-8 flex flex-wrap gap-3" method="get">
+        <input
+          type="text"
+          name="q"
+          defaultValue={q}
+          placeholder="Search by name, role, or bio"
+          className={`${fieldClass} min-w-50 flex-1`}
+        />
+        <input
+          type="text"
+          name="location"
+          defaultValue={location}
+          placeholder="Location"
+          className={`${fieldClass} w-40`}
+        />
+        <select name="industry" defaultValue={industry} className={`${fieldClass} w-44`}>
+          <option value="">All industries</option>
+          {industries.map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+        >
+          Filter
+        </button>
+        {hasFilters && (
+          <Link
+            href="/directory"
+            className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500"
+          >
+            Clear
+          </Link>
+        )}
+      </form>
+
       {profiles.length === 0 ? (
         <p className="mt-12 text-sm text-neutral-500">
-          No public profiles yet.{" "}
-          <Link href="/profile" className="underline">
-            Be the first to add yours.
-          </Link>
+          {hasFilters ? (
+            "No profiles match those filters."
+          ) : (
+            <>
+              No public profiles yet.{" "}
+              <Link href="/profile" className="underline">
+                Be the first to add yours.
+              </Link>
+            </>
+          )}
         </p>
       ) : (
         <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
           {profiles.map((profile: ProfileWithUser) => (
             <li
               key={profile.id}
-              className="rounded-xl border border-neutral-200 p-5 dark:border-neutral-800"
+              className="rounded-xl border border-neutral-200 p-5 transition hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600"
             >
-              <div className="flex items-center gap-3">
-                {profile.user.image && (
-                  <Image
-                    src={profile.user.image}
-                    alt={profile.user.name ?? "Member photo"}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                )}
-                <div>
-                  <p className="font-medium">{profile.user.name}</p>
-                  {profile.location && (
-                    <p className="text-xs text-neutral-500">
-                      {profile.location}
-                    </p>
+              <Link href={`/directory/${profile.id}`} className="block">
+                <div className="flex items-center gap-3">
+                  {profile.user.image && (
+                    <Image
+                      src={profile.user.image}
+                      alt={profile.user.name ?? "Member photo"}
+                      width={40}
+                      height={40}
+                      className="rounded-full"
+                    />
                   )}
+                  <div>
+                    <p className="font-medium">{profile.user.name}</p>
+                    {profile.location && (
+                      <p className="text-xs text-neutral-500">
+                        {profile.location}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {(profile.occupation || profile.company) && (
-                <p className="mt-3 text-sm">
-                  {profile.occupation}
-                  {profile.occupation && profile.company ? " at " : ""}
-                  {profile.company}
-                </p>
-              )}
-
-              {profile.industry && (
-                <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-                  {profile.industry}
-                </span>
-              )}
-
-              {profile.bio && (
-                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
-                  {profile.bio}
-                </p>
-              )}
-
-              {profile.lookingFor && (
-                <p className="mt-3 text-xs text-neutral-500">
-                  Looking for: {profile.lookingFor}
-                </p>
-              )}
-
-              <div className="mt-4 flex gap-4 text-xs">
-                {profile.linkedinUrl && (
-                  <a
-                    href={profile.linkedinUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline"
-                  >
-                    LinkedIn
-                  </a>
+                {(profile.occupation || profile.company) && (
+                  <p className="mt-3 text-sm">
+                    {profile.occupation}
+                    {profile.occupation && profile.company ? " at " : ""}
+                    {profile.company}
+                  </p>
                 )}
-                {profile.websiteUrl && (
-                  <a
-                    href={profile.websiteUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline"
-                  >
-                    Website
-                  </a>
+
+                {profile.industry && (
+                  <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+                    {profile.industry}
+                  </span>
                 )}
-              </div>
+
+                {profile.bio && (
+                  <p className="mt-3 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    {profile.bio}
+                  </p>
+                )}
+              </Link>
             </li>
           ))}
         </ul>
+      )}
+
+      {profiles.length > 0 && totalPages > 1 && (
+        <div className="mt-10 flex items-center justify-center gap-3">
+          {page > 1 ? (
+            <Link
+              href={buildPageHref(page - 1)}
+              className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500"
+            >
+              Prev
+            </Link>
+          ) : (
+            <span className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-400 dark:border-neutral-800 dark:text-neutral-600">
+              Prev
+            </span>
+          )}
+          <span className="text-sm text-neutral-500">
+            Page {page} of {totalPages}
+          </span>
+          {page < totalPages ? (
+            <Link
+              href={buildPageHref(page + 1)}
+              className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500"
+            >
+              Next
+            </Link>
+          ) : (
+            <span className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-400 dark:border-neutral-800 dark:text-neutral-600">
+              Next
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
