@@ -11,6 +11,12 @@ type ProfileWithUser = Prisma.ProfileGetPayload<{ include: { user: true } }>;
 const fieldClass =
   "rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm outline-none transition focus:border-accent dark:border-neutral-700 dark:focus:border-accent";
 
+const NEW_PROFILE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
+
+function newProfileCutoff() {
+  return new Date(Date.now() - NEW_PROFILE_WINDOW_MS);
+}
+
 export default async function DirectoryPage(props: PageProps<"/directory">) {
   const session = await auth();
 
@@ -105,6 +111,8 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
   const industries = industryRows
     .map((row) => row.industry)
     .filter((value): value is string => Boolean(value));
+
+  const recencyCutoff = newProfileCutoff();
 
   const hasFilters = Boolean(q || industry || location);
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -219,7 +227,10 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
         </div>
       ) : (
         <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {profiles.map((profile: ProfileWithUser) => (
+          {profiles.map((profile: ProfileWithUser) => {
+            const isNew = profile.createdAt > recencyCutoff;
+
+            return (
             <li
               key={profile.id}
               className="rounded-xl border border-neutral-200 p-5 transition hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:shadow-neutral-950/50"
@@ -264,10 +275,19 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
                   </p>
                 )}
 
-                {profile.industry && (
-                  <span className="mt-2 inline-block rounded-full bg-accent-subtle px-2.5 py-0.5 text-xs font-medium text-accent-subtle-foreground">
-                    {profile.industry}
-                  </span>
+                {(profile.industry || isNew) && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {profile.industry && (
+                      <span className="inline-block rounded-full bg-accent-subtle px-2.5 py-0.5 text-xs font-medium text-accent-subtle-foreground">
+                        {profile.industry}
+                      </span>
+                    )}
+                    {isNew && (
+                      <span className="inline-block rounded-full bg-accent-subtle px-2.5 py-0.5 text-xs font-medium text-accent-subtle-foreground">
+                        New
+                      </span>
+                    )}
+                  </div>
                 )}
 
                 {profile.bio && (
@@ -277,7 +297,8 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
                 )}
               </Link>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 
