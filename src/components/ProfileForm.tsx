@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { INDUSTRIES } from "@/lib/directoryOptions";
 
 type ProfileFormValues = {
   studentName: string;
@@ -36,6 +37,11 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
     setSaved(false);
     setError(null);
   }
+
+  const industryOptions =
+    values.industry && !(INDUSTRIES as readonly string[]).includes(values.industry)
+      ? [values.industry, ...INDUSTRIES]
+      : INDUSTRIES;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,12 +79,18 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
           </div>
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Industry</label>
-            <input
+            <select
               className={fieldClass}
-              placeholder="e.g. Trades, Real Estate, Finance"
               value={values.industry}
               onChange={(e) => set("industry", e.target.value)}
-            />
+            >
+              <option value="">Select an industry</option>
+              {industryOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Company / business</label>
