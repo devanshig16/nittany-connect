@@ -101,6 +101,19 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
       ? [values.industry, ...INDUSTRIES]
       : INDUSTRIES;
 
+  const completionFields = [
+    values.occupation,
+    values.industry,
+    values.company,
+    values.location,
+    values.bio,
+    values.lookingFor,
+    values.linkedinUrl,
+    values.websiteUrl,
+  ];
+  const completedCount = completionFields.filter((f) => f.trim().length > 0).length;
+  const totalFields = completionFields.length;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -123,6 +136,21 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className={sectionHeadingClass}>Profile completion</span>
+          <span className="text-sm text-neutral-500">
+            {completedCount} of {totalFields} fields complete
+          </span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+          <div
+            className="h-full rounded-full bg-accent transition-all"
+            style={{ width: `${(completedCount / totalFields) * 100}%` }}
+          />
+        </div>
+      </div>
+
       <fieldset className="flex flex-col gap-6">
         <legend className={sectionHeadingClass}>About you</legend>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
