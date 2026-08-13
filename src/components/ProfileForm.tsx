@@ -136,7 +136,25 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10">
-      <div className="flex flex-col gap-2">
+      <fieldset className="flex flex-col gap-4">
+        <legend className={sectionHeadingClass}>Visibility</legend>
+        <label className="flex items-start gap-2.5 text-sm text-neutral-700 dark:text-neutral-300">
+          <input
+            type="checkbox"
+            checked={values.isPublic}
+            onChange={(e) => set("isPublic", e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-accent"
+          />
+          <span>
+            List me in the public directory
+            <span className={sectionDescClass + " block"}>
+              Other signed-in parents will be able to find and contact you.
+            </span>
+          </span>
+        </label>
+      </fieldset>
+
+      <div className="flex flex-col gap-2 border-t border-neutral-200 pt-8 dark:border-neutral-800">
         <div className="flex items-center justify-between">
           <span className={sectionHeadingClass}>Profile completion</span>
           <span className="text-sm text-neutral-500">
@@ -151,7 +169,7 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
         </div>
       </div>
 
-      <fieldset className="flex flex-col gap-6">
+      <fieldset className="flex flex-col gap-6 border-t border-neutral-200 pt-8 dark:border-neutral-800">
         <legend className={sectionHeadingClass}>About you</legend>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
@@ -276,24 +294,6 @@ export function ProfileForm({ initial }: { initial: ProfileFormValues }) {
             />
           </div>
         </div>
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-4 border-t border-neutral-200 pt-8 dark:border-neutral-800">
-        <legend className={sectionHeadingClass}>Visibility</legend>
-        <label className="flex items-start gap-2.5 text-sm text-neutral-700 dark:text-neutral-300">
-          <input
-            type="checkbox"
-            checked={values.isPublic}
-            onChange={(e) => set("isPublic", e.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-accent"
-          />
-          <span>
-            List me in the public directory
-            <span className={sectionDescClass + " block"}>
-              Other signed-in parents will be able to find and contact you.
-            </span>
-          </span>
-        </label>
       </fieldset>
 
       <div className="flex items-center gap-3 border-t border-neutral-200 pt-8 dark:border-neutral-800">
