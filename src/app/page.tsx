@@ -45,7 +45,7 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col items-center px-6 py-20 text-center sm:py-28">
+    <div className="mx-auto flex max-w-3xl flex-col items-center px-6 py-20 text-center sm:py-28 animate-fade-in-up">
       <span className="rounded-full bg-accent-subtle px-3 py-1 text-xs font-medium tracking-wide text-accent-subtle-foreground uppercase">
         For Penn State parents
       </span>

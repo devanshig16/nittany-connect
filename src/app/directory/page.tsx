@@ -276,13 +276,14 @@ export default async function DirectoryPage(props: PageProps<"/directory">) {
         </div>
       ) : (
         <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {profiles.map((profile: ProfileWithUser) => {
+          {profiles.map((profile: ProfileWithUser, index: number) => {
             const isNew = profile.createdAt > recencyCutoff;
 
             return (
             <li
               key={profile.id}
-              className="rounded-xl border border-neutral-200 p-5 transition hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:shadow-neutral-950/50"
+              style={{ animationDelay: `${Math.min(index, 8) * 30}ms` }}
+              className="animate-fade-in-up rounded-xl border border-neutral-200 p-5 transition hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:shadow-neutral-950/50"
             >
               <Link href={`/directory/${profile.id}`} className="block">
                 <div className="flex items-center gap-3">
