@@ -1,8 +1,8 @@
 # Nittany Connect
 
-A minimal, clean site for parents of Penn State students to meet each other, talk trade, occupations, and business, and connect to work together.
+A directory for parents of Penn State students to find each other by occupation, industry, and what they're looking for — trade work, business connections, hiring — instead of relying on word of mouth in a Facebook group.
 
-Built with Next.js (App Router), Tailwind CSS, Auth.js (Google sign-in), and Prisma + Postgres (Neon).
+Solo-built end to end: Next.js (App Router), Tailwind CSS, Auth.js (Google sign-in), Prisma + Postgres (Neon).
 
 ## Features
 
